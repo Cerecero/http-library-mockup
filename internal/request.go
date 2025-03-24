@@ -36,6 +36,11 @@ func NewRequest(method, path, host, body string) (*Request, error) {
 
 }
 
+func (r *Request) WithHeader(key, value string) *Request {
+	r.Headers = append(r.Headers, Header{AsTitle(key), value})
+	return r
+}
+
 // HTTP Request look like this
 // <METHOD> <PATH> <PROTOCOL/VERSION>
 // Host: <Host>

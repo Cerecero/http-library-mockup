@@ -30,6 +30,11 @@ func NewResponse(status int, body string) (*Response, error) {
 	}
 }
 
+func (resp *Response) WithHeader(key, value string) *Response {
+	resp.Headers = append(resp.Headers, Header{AsTitle(key), value})
+	return resp
+}
+
 // HTTP response look like this
 // <PROTOCOL/VERSION> <STATUS CODE> <STATUS MESSAGE>
 // [<HEADER>: <VALUE>] (optional)
