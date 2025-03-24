@@ -1,9 +1,33 @@
 package internal
 
+import (
+	"errors"
+	"fmt"
+	"net/http"
+)
+
 type Response struct {
 	StatusCode int
-	Headers []struct {Key, Value string}
+	Headers []Header
 	Body string
+}
+
+func NewResponse(status int, body string) (*Response, error) {
+	switch {
+	case status < 100 || status > 599:
+		return nil, errors.New("invalid status code")
+	default:
+		if body == ""{
+			body = http.StatusText(status)
+		}
+		headers := []Header{}
+		headers = append(headers, Header{"Content-Length", fmt.Sprintf("%d", len(body))})
+		return &Response{
+			StatusCode: status,
+			Headers: headers,
+			Body: body,
+		}, nil
+	}
 }
 
 // HTTP response look like this
