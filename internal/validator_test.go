@@ -4,7 +4,7 @@ import "testing"
 
 func TestTitleCaseKey(t *testing.T) {
 	for input, want := range map[string]string{
-		"for-bar": "Foo-Bar",
+		"foo-bar": "Foo-Bar",
 		"cOnTeNt-TyPE": "Content-Type",
 		"host": "Host",
 		"host-": "Host-",
