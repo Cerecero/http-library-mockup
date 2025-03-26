@@ -3,6 +3,7 @@ package internal
 import (
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 )
 
@@ -35,6 +36,27 @@ func (resp *Response) WithHeader(key, value string) *Response {
 	return resp
 }
 
+
+func (resp *Response) WriteTo(w io.Writer) (n int64, err error) {
+	printf := func(format string, args ...any) error {
+		m, err := fmt.Fprintf(w, format, args...)
+		n += int64(m)
+		return err
+	}
+	if err := printf("HTTP/1.1 %d %s\r\n", resp.StatusCode, http.StatusText(resp.StatusCode)); err != nil {
+		return n, err
+	}
+
+	for _, h := range resp.Headers {
+		if err := printf("%s: %s\r\n", h.Key, h.Value); err != nil {
+			return n, err
+		}
+	}
+	if err := printf("\r\n%s\r\n", resp.Body); err != nil {
+		return n, err
+	}
+	return n, nil
+}
 // HTTP response look like this
 // <PROTOCOL/VERSION> <STATUS CODE> <STATUS MESSAGE>
 // [<HEADER>: <VALUE>] (optional)
