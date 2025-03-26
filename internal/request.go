@@ -97,7 +97,7 @@ func ParseRequest(raw string) (r Request, err error) {
 	var bodyStart int
 
 	for i := 1; i < len(lines); i++ {
-		if lines[i] == ""{
+		if lines[i] == "" {
 			bodyStart = i + 1
 			break
 		}
@@ -112,7 +112,7 @@ func ParseRequest(raw string) (r Request, err error) {
 
 		r.Headers = append(r.Headers, Header{key, val})
 	}
-	
+
 	end := len(lines) - 1
 	r.Body = strings.Join(lines[bodyStart:end], "\r\n")
 	if !foundhost {

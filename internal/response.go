@@ -73,38 +73,39 @@ func (resp *Response) MarshalText() ([]byte, error) {
 }
 
 func ParseResponse(raw string) (resp *Response, err error) {
-    lines := splitLines(raw)
-    log.Println(lines)
+	lines := splitLines(raw)
+	log.Println(lines)
 
-    first := strings.SplitN(lines[0], " ", 3)
-    if !strings.Contains(first[0], "HTTP") {
-        return nil, fmt.Errorf("malformed response: first line should contain HTTP version")
-    }
-    resp = new(Response)
-    resp.StatusCode, err = strconv.Atoi(first[1])
-    if err != nil {
-        return nil, fmt.Errorf("malformed response: expected status code to be an integer, got %q", first[1])
-    }
-    if first[2] == "" || http.StatusText(resp.StatusCode) != first[2] {
-        log.Printf("missing or incorrect status text for status code %d: expected %q, but got %q", resp.StatusCode, http.StatusText(resp.StatusCode), first[2])
-    }
-    var bodyStart int
-    for i := 1; i < len(lines); i++ {
-        log.Println(i, lines[i])
-        if lines[i] == "" {
-            bodyStart = i + 1
-            break
-        }
-        key, val, ok := strings.Cut(lines[i], ": ")
-        if !ok {
-            return nil, fmt.Errorf("malformed response: header %q should be of form 'key: value'", lines[i])
-        }
-        key = AsTitle(key)
-        resp.Headers = append(resp.Headers, Header{key, val})
-    }
-    resp.Body = strings.TrimSpace(strings.Join(lines[bodyStart:], "\r\n")) // recombine the body using normal newlines.
-    return resp, nil
+	first := strings.SplitN(lines[0], " ", 3)
+	if !strings.Contains(first[0], "HTTP") {
+		return nil, fmt.Errorf("malformed response: first line should contain HTTP version")
+	}
+	resp = new(Response)
+	resp.StatusCode, err = strconv.Atoi(first[1])
+	if err != nil {
+		return nil, fmt.Errorf("malformed response: expected status code to be an integer, got %q", first[1])
+	}
+	if first[2] == "" || http.StatusText(resp.StatusCode) != first[2] {
+		log.Printf("missing or incorrect status text for status code %d: expected %q, but got %q", resp.StatusCode, http.StatusText(resp.StatusCode), first[2])
+	}
+	var bodyStart int
+	for i := 1; i < len(lines); i++ {
+		log.Println(i, lines[i])
+		if lines[i] == "" {
+			bodyStart = i + 1
+			break
+		}
+		key, val, ok := strings.Cut(lines[i], ": ")
+		if !ok {
+			return nil, fmt.Errorf("malformed response: header %q should be of form 'key: value'", lines[i])
+		}
+		key = AsTitle(key)
+		resp.Headers = append(resp.Headers, Header{key, val})
+	}
+	resp.Body = strings.TrimSpace(strings.Join(lines[bodyStart:], "\r\n")) // recombine the body using normal newlines.
+	return resp, nil
 }
+
 // HTTP response look like this
 // <PROTOCOL/VERSION> <STATUS CODE> <STATUS MESSAGE>
 // [<HEADER>: <VALUE>] (optional)
