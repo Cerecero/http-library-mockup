@@ -15,7 +15,7 @@ func AsTitle(key string) string {
 
 func isTitleCase(key string) bool {
 	for i := range key {
-		if i == 0 || key[i-1] == '-'{
+		if i == 0 || key[i-1] == '-' {
 			if key[i] >= 'a' && key[i] <= 'z' {
 				return false
 			}
@@ -53,5 +53,19 @@ func upper(b byte) byte {
 	return b
 }
 
-
-
+func splitLines(s string) []string {
+	if s == "" {
+		return nil
+	}
+	var lines []string
+	i := 0
+	for {
+		j := strings.Index(s[i:], "\r\n")
+		if j == -1 {
+			lines = append(lines, s[i:])
+			return lines
+		}
+		lines = append(lines, s[i:i+j])
+		i += j + 2
+	}
+}
