@@ -3,6 +3,7 @@ package internal
 import (
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 )
 
@@ -39,6 +40,28 @@ func NewRequest(method, path, host, body string) (*Request, error) {
 func (r *Request) WithHeader(key, value string) *Request {
 	r.Headers = append(r.Headers, Header{AsTitle(key), value})
 	return r
+}
+
+func (r *Request) WriteTo(w io.Writer) (n int64, err error) {
+	printf := func(format string, args ...any) error {
+		m, err := fmt.Fprintf(w, format, args...)
+		n += int64(m)
+		return err
+	}
+
+	if err := printf("%s %s HTTP/1.1\r\n", r.Method, r.Path); err != nil {
+		return n, err
+	}
+
+	for _, h := range r.Headers {
+		if err := printf("%s: %s\r\n", h.Key, h.Value); err != nil {
+			return n, err
+		}
+	}
+
+	printf("\r\n")
+	err = printf("%s\r\n", r.Body)
+	return n, err
 }
 
 // HTTP Request look like this
