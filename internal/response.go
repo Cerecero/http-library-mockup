@@ -1,16 +1,19 @@
 package internal
 
 import (
+	"bytes"
+	"encoding"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 )
 
 type Response struct {
 	StatusCode int
-	Headers []Header
-	Body string
+	Headers    []Header
+	Body       string
 }
 
 func NewResponse(status int, body string) (*Response, error) {
@@ -18,15 +21,15 @@ func NewResponse(status int, body string) (*Response, error) {
 	case status < 100 || status > 599:
 		return nil, errors.New("invalid status code")
 	default:
-		if body == ""{
+		if body == "" {
 			body = http.StatusText(status)
 		}
 		headers := []Header{}
 		headers = append(headers, Header{"Content-Length", fmt.Sprintf("%d", len(body))})
 		return &Response{
 			StatusCode: status,
-			Headers: headers,
-			Body: body,
+			Headers:    headers,
+			Body:       body,
 		}, nil
 	}
 }
@@ -35,7 +38,6 @@ func (resp *Response) WithHeader(key, value string) *Response {
 	resp.Headers = append(resp.Headers, Header{AsTitle(key), value})
 	return resp
 }
-
 
 func (resp *Response) WriteTo(w io.Writer) (n int64, err error) {
 	printf := func(format string, args ...any) error {
@@ -57,6 +59,17 @@ func (resp *Response) WriteTo(w io.Writer) (n int64, err error) {
 	}
 	return n, nil
 }
+
+var _ fmt.Stringer = (*Response)(nil) //Compile-time interface check
+var _ encoding.TextMarshaler =  (*Response)(nil)
+
+func (resp *Response) String() string { b := new(strings.Builder); resp.WriteTo(b); return b.String() }
+func (resp *Response) MarshalText() ([]byte, error) {
+	b := new(bytes.Buffer)
+	resp.WriteTo(b)
+	return b.Bytes(), nil
+}
+
 // HTTP response look like this
 // <PROTOCOL/VERSION> <STATUS CODE> <STATUS MESSAGE>
 // [<HEADER>: <VALUE>] (optional)

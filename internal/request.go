@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"bytes"
+	"encoding"
 	"errors"
 	"fmt"
 	"io"
@@ -62,6 +64,17 @@ func (r *Request) WriteTo(w io.Writer) (n int64, err error) {
 	printf("\r\n")
 	err = printf("%s\r\n", r.Body)
 	return n, err
+}
+
+
+var _ fmt.Stringer = (*Request)(nil) //Compile-time interface check
+var _ encoding.TextMarshaler =  (*Request)(nil)
+
+func (resp *Request) String() string { b := new(strings.Builder); resp.WriteTo(b); return b.String() }
+func (resp *Request) MarshalText() ([]byte, error) {
+	b := new(bytes.Buffer)
+	resp.WriteTo(b)
+	return b.Bytes(), nil
 }
 
 // HTTP Request look like this
