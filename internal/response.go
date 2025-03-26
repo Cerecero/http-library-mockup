@@ -61,7 +61,7 @@ func (resp *Response) WriteTo(w io.Writer) (n int64, err error) {
 }
 
 var _ fmt.Stringer = (*Response)(nil) //Compile-time interface check
-var _ encoding.TextMarshaler =  (*Response)(nil)
+var _ encoding.TextMarshaler = (*Response)(nil)
 
 func (resp *Response) String() string { b := new(strings.Builder); resp.WriteTo(b); return b.String() }
 func (resp *Response) MarshalText() ([]byte, error) {

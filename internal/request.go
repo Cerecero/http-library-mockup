@@ -76,6 +76,10 @@ func (resp *Request) MarshalText() ([]byte, error) {
 	return b.Bytes(), nil
 }
 
+func ParseRequest(raw string) (r Request, err error) {
+	lines := splitLines
+}
+
 // HTTP Request look like this
 // <METHOD> <PATH> <PROTOCOL/VERSION>
 // Host: <Host>
